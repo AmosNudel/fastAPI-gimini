@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ask the Gemini Model</title>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> <!-- Include Axios -->
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    textarea {
+      font-size: 16px;
+      padding: 10px;
+      width: 100%;
+      max-width: 500px;
+      margin-top: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .response {
+      margin-top: 20px;
+      border-top: 1px solid #ccc;
+      padding-top: 10px;
+    }
+    .history {
+      margin-top: 20px;
+      border-top: 1px solid #ccc;
+      padding-top: 10px;
+    }
+    .history h3 {
+      font-size: 18px;
+    }
+    .history-item {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Ask the Gemini Model</h1>
+  
+  <div>
+    <textarea id="question" rows="4" cols="50" placeholder="Ask your question..."></textarea>
+  </div>
+  <button onclick="askQuestion()">Submit</button>
+
+  <div id="response" class="response" style="display: none;">
+    <h2>Response:</h2>
+    <p id="responseText"></p>
+  </div>
+
+  <div id="history" class="history" style="display: none;">
+    <h3>Previous Questions and Responses</h3>
+    <div id="historyList"></div>
+  </div>
+
+  <script>
+    // Function to store the question and response in localStorage
+    function saveToLocalStorage(question, response) {
+      let history = JSON.parse(localStorage.getItem('history')) || []; // Get existing history or start an empty array
+      history.push({ question, response }); // Add the new question-response pair
+      localStorage.setItem('history', JSON.stringify(history)); // Save back to localStorage
+    }
+
+    // Function to load the history from localStorage and display it
+    function loadHistory() {
+      const history = JSON.parse(localStorage.getItem('history')) || [];
+      const historyList = document.getElementById('historyList');
+      historyList.innerHTML = ''; // Clear the list before rendering
+
+      history.forEach(item => {
+        const historyItem = document.createElement('div');
+        historyItem.classList.add('history-item');
+        historyItem.innerHTML = `<strong>Question:</strong> ${item.question} <br> <strong>Response:</strong> ${item.response}`;
+        historyList.appendChild(historyItem);
+      });
+
+      if (history.length > 0) {
+        document.getElementById('history').style.display = 'block'; // Show history section if there's any history
+      }
+    }
+
+    // Call loadHistory on page load to show stored questions and responses
+    window.onload = loadHistory;
+
+    // Function to handle the question submission
+    function askQuestion() {
+      const question = document.getElementById('question').value.trim();
+
+      if (question) {
+        // Make POST request using Axios
+        axios.post('http://127.0.0.1:8000/ask', {
+          question: question
+        })
+        .then(function (response) {
+          // Display the response
+          document.getElementById('response').style.display = 'block';
+          document.getElementById('responseText').textContent = response.data.response;
+
+          // Save the question and response to localStorage
+          saveToLocalStorage(question, response.data.response);
+          
+          // Reload the history to include the new question and response
+          loadHistory();
+        })
+        .catch(function (error) {
+          console.error('Error:', error);
+          alert('An error occurred while fetching the response.');
+        });
+      } else {
+        alert('Please enter a question.');
+      }
+    }
+  </script>
+
+</body>
+</html>
