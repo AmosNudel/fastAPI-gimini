@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 # Load the Google API key from environment variables (or hardcode it here)
-API_KEY = os.getenv("GOOGLE_API_KEY", "AIzaSyD-uCGPkEnc_fichIw-3-c0RFl0D_SvTIY")  # Replace with your API key if needed
+API_KEY = os.getenv("GOOGLE_API_KEY", "API-KEY")  # Replace with your API key if needed
 
 # Initialize the Google Gemini model
 llm4 = ChatGoogleGenerativeAI(model="gemini-2.0-flash", google_api_key=API_KEY)
